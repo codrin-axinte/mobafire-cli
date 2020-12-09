@@ -1,4 +1,4 @@
 .DS_store
-idea/
+.idea/
 cache/*.html
 venv
