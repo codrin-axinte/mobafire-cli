@@ -1,5 +1,3 @@
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import WordCompleter
 from rich.console import Console
 from rich.traceback import install
 
@@ -20,7 +18,6 @@ class App:
         self.champion_names = None
         self.selected_champion = ''
         self.is_running = True
-        self.session = None
 
     def get_champions_names(self):
         if self.champion_names is None:

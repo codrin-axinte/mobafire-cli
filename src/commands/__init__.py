@@ -1,8 +1,9 @@
-def load_shell():
+def load_shell(app, style):
     from src.commands import champion
     from src.commands import common
     from src.shell import Shell
-    shell = Shell()
+
+    shell = Shell(app)
 
     shell.add('clear', common.clear_console, ['cls'])
     shell.add('quit', common.quit_app, ['exit', 'q'])
@@ -18,5 +19,7 @@ def load_shell():
     shell.add('runes', champion.search)
     shell.add('items', common.command_not_implemented)
     shell.add('spells', common.command_not_implemented)
+
+    shell.setup_prompt_session(style)
 
     return shell

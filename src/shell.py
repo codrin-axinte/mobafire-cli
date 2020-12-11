@@ -3,81 +3,100 @@ from prompt_toolkit.completion import WordCompleter
 
 
 class Shell:
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.commands = {}
         self.aliases = {}
         self.session = None
 
-    def add(self, name, callback, aliases=None):
-        self.commands[name] = callback
+    def add(self, command, callback, aliases=None):
+        self.commands[command] = callback
         if aliases is not None:
             for alias in aliases:
-                self.aliases[alias] = name
+                self.aliases[alias] = command
         return self
 
-    def alias(self, name, pointing_to_name):
-        self.aliases[name] = pointing_to_name
+    def alias(self, name, command):
+        self.aliases[name] = command
         return self
-
-    def get_function(self, command):
-        if command in self.commands:
-            return self.commands[command]
-        elif command in self.aliases:
-            return self.get_function(self.aliases[command])
-
-        return None
 
     def has(self, command) -> bool:
-        return self.get_function(command) is not None
+        return self._get_function_pointer(command) is not None
 
-    def _call(self, app, command, *args, **kwargs) -> bool:
-        callback = self.get_function(command)
-        if callback is not None:
-            response = callback(app, *args, **kwargs)
-            return True
-        else:
-            return False
-
-    def setup_prompt_session(self, app, style=None):
-        champions = app.get_champions_names()
-        choices = self.get_prompt_choices(champions)
+    def setup_prompt_session(self, style=None):
+        champions = self.app.get_champions_names()
+        choices = self._get_prompt_choices(champions)
         completer = WordCompleter(choices)
         # Create prompt object.
         session = PromptSession()
         session.completer = completer
         session.style = style
         session.complete_in_thread = True
-        session.message = self.get_prompt_message()
+        session.message = self._get_prompt_message()
         self.session = session
 
         return self
 
-    def execute(self, app, command):
+    def execute(self, command):
+        """
+        Find the callable function based on the given command name and then call it.
+        This method will search within the commands and aliases dictionaries.
+        :param command:
+        :return:
+        """
+
+        # Do nothing, my man needs some space
         if command == '':
             return
 
-        # If the command is the name of a champion, then assign and update the prompt
-        if command in app.champion_names:
-            app.selected_champion = command
-            self.update_prompt(app.selected_champion)
-            app.console.print(f'Selected champion <{command}>')
+        # If the command is the name of a champion,
+        # then assign the champion and update the prompt
+        if command in self.app.champion_names:
+            self.app.selected_champion = command
+            self.session.message = self._get_prompt_message(self.app.selected_champion)
+            self.app.console.print(f'Selected champion <{command}>')
+
+        # Even though we can remove the has check and use only the _call method,
+        # We separate them so we can have more control over the feedback we give to the user.
         elif self.has(command):
-            if not self._call(app, command):
-                app.console.log(f'[red]An error has occurred.[/red]')
+            if not self._call(command):
+                self.app.console.log(f'[red]An error has occurred.[/red]')
         else:
-            app.console.log(f'Command <{command}> not recognized.')
+            self.app.console.log(f'[red]Command <{command}> not recognized.[/red]')
 
-    def interactive(self, app):
-        while app.is_running:
+    def interactive(self):
+        """
+        The interactive mode is continuous way to execute commands,
+        Until the user decides to close the session.
+        :param app:
+        :return:
+        """
+        while self.app.is_running:
             command = self.session.prompt().strip().lower()
-            self.execute(app, command)
+            self.execute(command)
 
-    def update_prompt(self, champion):
-        self.session.message = self.get_prompt_message(champion)
-        return self
+    def _get_function_pointer(self, command):
+
+        if command in self.commands:
+            return self.commands[command]
+        elif command in self.aliases:
+            # We do it recursively in case we have nested pointers.
+            # Example: exit -> q -> quit
+            # This shouldn't happen though, but just in case.
+            return self._get_function_pointer(self.aliases[command])
+
+        return None
+
+    def _call(self, command) -> bool:
+        callback_pointer = self._get_function_pointer(command)
+        if callback_pointer is not None:
+            response = callback_pointer(self.app)
+            return True
+        else:
+            return False
 
     @staticmethod
-    def get_prompt_message(champion=''):
+    def _get_prompt_message(champion=''):
         return [
             ('class:name', 'mobafire'),
             ('class:colon', ':'),
@@ -85,7 +104,7 @@ class Shell:
             ('class:pound', '$ '),
         ]
 
-    def get_prompt_choices(self, champions):
+    def _get_prompt_choices(self, champions):
         choices = []
         for command in self.commands:
             choices.append(command)

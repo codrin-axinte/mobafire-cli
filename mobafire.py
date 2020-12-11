@@ -1,8 +1,9 @@
+from sys import argv
+
 from prompt_toolkit.styles import Style
 
 from src.app import App
 from src.commands import load_shell
-from sys import argv
 
 '''
 
@@ -41,15 +42,16 @@ style = Style.from_dict({
 # END CONFIGURATION
 
 def main():
+    # Initialize the app and the shell using the configuration data
     app = App(cache_folder=CACHE_FOLDER, database_folder=DATABASE_FOLDER)
-    shell = load_shell().setup_prompt_session(app=app, style=style)
-    # Iterate over all the commands and execute each one of them
+    shell = load_shell(app=app, style=style)
+    # If the app has any arguments, then iterate over all and execute each one of them as a command.
     if len(argv) > 1:
         for i in range(1, len(argv)):
-            shell.execute(app, argv[i])
+            shell.execute(argv[i])
     else:
-        # If no argument is supplied then we enter into interactive mode
-        shell.interactive(app)
+        # If no argument is supplied then we enter the interactive mode
+        shell.interactive()
 
 
 if __name__ == '__main__':
