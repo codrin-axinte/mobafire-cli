@@ -5,21 +5,25 @@ def load_shell(app, style):
 
     shell = Shell(app)
 
+    # Global Commands
     shell.add('clear', common.clear_console, ['cls'])
     shell.add('quit', common.quit_app, ['exit', 'q'])
     shell.add('debug', common.debug, ['dbg'])
     shell.add('sync', common.database_sync)
     shell.add('help', common.help)
 
-    shell.add('all', champion.search)
-    shell.add('guide', champion.search)
-    shell.add('tips', champion.search)
-    shell.add('counters', champion.search)
-    shell.add('countered', champion.search, ['enemies'])
-    shell.add('runes', champion.search)
-    shell.add('items', common.command_not_implemented)
+    # Champion Commands
+    shell.add('all', champion.all_info)
+    shell.add('guide', common.command_not_implemented)
+    shell.add('tips', common.command_not_implemented)
+    shell.add('counters', common.command_not_implemented)
+    shell.add('countered', common.command_not_implemented, ['enemies'])
+    shell.add('runes', champion.runes)
+    shell.add('abilities', champion.abilities, ['skills'])
+    shell.add('items', champion.items)
     shell.add('spells', common.command_not_implemented)
 
+    # Setup shell prompt
     shell.setup_prompt_session(style)
 
     return shell

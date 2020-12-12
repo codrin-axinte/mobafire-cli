@@ -1,11 +1,15 @@
-from rich.columns import Columns
-from rich.panel import Panel
 from pathlib import Path
 
+from rich.columns import Columns
+from rich.console import RenderableType
+from rich.panel import Panel
 
-class Runes:
+from src.parsers.parser import Parser
 
-    def get(self, soup):
+
+class Runes(Parser):
+
+    def parse(self, soup) -> RenderableType:
         runes = soup.find_all('div', attrs={'class': 'new-runes'})
         rune = runes[0]
         types = ['primary', 'secondary', 'bonuses']
