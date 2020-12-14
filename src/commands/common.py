@@ -15,8 +15,12 @@ def debug(app):
     from rich import print
     content = app.cache.read('dump.html')
     soup = BeautifulSoup(content, features='html.parser')
-    runes = Runes().get(soup)
+    runes = Runes().parse(soup)
     print(runes)
+
+
+def cache_clear(app):
+    app.cache.reload()
 
 
 def quit_app(app):
@@ -25,6 +29,7 @@ def quit_app(app):
 
 def clear_console(app):
     app.console.clear()
+
 
 def help(app):
     command_not_implemented(app)

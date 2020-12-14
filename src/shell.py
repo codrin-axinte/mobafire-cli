@@ -37,6 +37,15 @@ class Shell:
 
         return self
 
+    def run(self, argv):
+        # If the app has any arguments, then iterate over all and execute each one of them as a command.
+        if len(argv) > 1:
+            for i in range(1, len(argv)):
+                self.execute(argv[i])
+        else:
+            # If no argument is supplied then we enter the interactive mode
+            self.interactive()
+
     def execute(self, command):
         """
         Find the callable function based on the given command name and then call it.

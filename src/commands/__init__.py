@@ -9,7 +9,8 @@ def load_shell(app, style):
     shell.add('clear', common.clear_console, ['cls'])
     shell.add('quit', common.quit_app, ['exit', 'q'])
     shell.add('debug', common.debug, ['dbg'])
-    shell.add('sync', common.database_sync)
+    shell.add('db:sync', common.database_sync)
+    shell.add('cache:clear', common.cache_clear)
     shell.add('help', common.help)
 
     # Champion Commands
